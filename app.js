@@ -9,15 +9,11 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
-require('dotenv').config
+require('dotenv').config()
+const googlePlusTokenStrategy = require('passport-google-plus-token')
+const dbmodel = require('./models/customers')
 
 const app = express()
-
-const admin = {
-  name: 'Arun',
-  password: '123456'
-}
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.set('view engine', 'ejs')
@@ -41,47 +37,30 @@ app.use(cors({
   optionsSuccessStatus: 200
 }))
 
-//initializing google auth strategy
-passport.use(new GoogleStrategy({
+passport.use('googleToken', new googlePlusTokenStrategy({
   clientID: '236069476570-lvmk3ejvh281g7unlffpn114ta2n6nr7.apps.googleusercontent.com',
-  clientSecret: 'L5Din7GetgBeQzIqWIHX7S_g',
-  callbackURL: 'http://localhost:5000'
-},
-  async function (accessToken, refreshToken, profile, done) {
-    await User.findOrCreate({ googleId: profile.id }, function (err, user) {
-      return done(err, user);
-    });
+  clientSecret: 'L5Din7GetgBeQzIqWIHX7S_g'
+}, async (accessToken, refreshToken, profile, done) => {
+  try {
+    console.log('AcessToken ', accessToken)
+    console.log('refreshToken ', refreshToken)
+    console.log('profile ', profile)
+
+    const existingUser = await dbmodel.admin.findOne({ where: { id: profile.id } })
+    if(existingUser){
+      console.log('User already exits')
+      return done(null, existingUser)
+    }
+    const newUser = await dbmodel.admin.create({
+      id: profile.id,
+      email: profile.emails[0].value
+    })
+    console.log('New user added ', newUser)
+    done(null, newUser)
+  } catch (error) {
+    done(error, false, error.message)
   }
-))
-
-//go to google login page
-app.get('/auth/google',
-  passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login'] }))
-
-//after login, redirecting to the main page
-app.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/login' }),
-  async function (req, res) {
-    await new Promise(() => {
-      res.redirect('/')
-    })
-  })
-
-//login credentials for the admin
-app.post('/login', async (req, res) => {
-  let username = req.body.username
-  let password = req.body.password
-
-  if (username == admin.name && password == admin.password) {
-    await new Promise(() => {
-      res.render('Welcome.ejs')
-    })
-  } else {
-    await new Promise(() => {
-      res.status(403).send('Not a admin')
-    })
-  }
-})
+}))
 
 //main page after the admin login
 app.get('/', async (req, res, next) => {
@@ -90,6 +69,7 @@ app.get('/', async (req, res, next) => {
     next()
   })
 })
+
 app.use('/customers', customerRoutes)
 
 let PORT = process.env.PORT || 5000

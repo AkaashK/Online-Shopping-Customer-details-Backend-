@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize')
 const database = require('../config/db.config')
 
-const customer = database.define('customerDetails', {
+exports.customer = database.define('customerDetails', {
     ID: {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -21,4 +21,16 @@ const customer = database.define('customerDetails', {
     }
 }, {timestamps: false, freezeTableName: true}, )
 
-module.exports = customer
+exports.admin = database.define('admindetails', {
+    id: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        primaryKey: true
+    },
+    email: {
+        type: Sequelize.STRING,
+        allowNull: false
+    }
+}, {timestamps: false, freezeTableName: true}, )
+
+
