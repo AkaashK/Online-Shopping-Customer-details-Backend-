@@ -22,14 +22,18 @@ exports.customer = database.define('customerDetails', {
 }, {timestamps: false, freezeTableName: true}, )
 
 exports.admin = database.define('admindetails', {
-    id: {
+    google_id: {
         type: Sequelize.STRING,
-        allowNull: false,
         primaryKey: true
     },
-    email: {
+    google_email: {
         type: Sequelize.STRING,
-        allowNull: false
+    },
+    facebook_id: {
+        type: Sequelize.STRING,
+    },
+    facebook_email: {
+        type: Sequelize.STRING,
     }
 }, {timestamps: false, freezeTableName: true}, )
 

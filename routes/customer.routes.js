@@ -8,14 +8,7 @@ router.use(bodyParser.json())
 
 const passport = require('passport')
 
-const jwt = require('jsonwebtoken')
-
 const customerControls = require('../controllers/customer.controller')
-
-//Any router other than the give routes
-// router.get('*', (req,res) => {
-//     res.sendStatus(404)
-// })
 
 router.get('/', customerControls.getCustomers)
 
@@ -31,14 +24,8 @@ router.get('/minPurchase', customerControls.minPurchase)
 
 router.get('/maxPurchase', customerControls.maxPurchase)
 
-router.post('/oauth/google', passport.authenticate('googleToken', { session: false }), async (req, res) => {
-    await new Promise((success) => {
-        if(success){
-            return res.render('Welcome.ejs')
-        } else {
-            return res.status(403).send('Unauthorized user')
-        }
-    })
-})
+router.post('/oauth/google', passport.authenticate('googleToken', { session: false }), customerControls.googleOAuth)
+
+router.post('/oauth/facebook', passport.authenticate('facebookToken', {session: false}), customerControls.facebookOAuth)
 
 module.exports = router

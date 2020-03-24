@@ -105,3 +105,23 @@ exports.maxPurchase = async (req,res) => {
     }
 }
 
+exports.googleOAuth =  async (req, res) => {
+    await new Promise((success) => {
+        if(success){
+            return res.render('Welcome.ejs')
+        } else {
+            return res.status(403).send('Unauthorized user')
+        }
+    })
+}
+
+exports.facebookOAuth =  async (req, res) => {
+    await new Promise((success) => {
+        if(success){
+            return res.render('Welcome.ejs')
+        } else {
+            return res.status(403).send('Unauthorized user')
+        }
+    })
+}
+
